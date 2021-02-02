@@ -3,6 +3,7 @@
 namespace Tests\Unit;
 
 use App\Models\Question;
+use App\Models\Answer;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
