@@ -4,6 +4,7 @@ namespace Tests\Unit;
 
 use App\Models\Question;
 use App\Models\Answer;
+use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -33,5 +34,17 @@ class QuestionTest extends TestCase
         $this->assertTrue($publishedQuestions->contains($publishedQuestion1));
         $this->assertTrue($publishedQuestions->contains($publishedQuestion2));
         $this->assertFalse($publishedQuestions->contains($unpublishedQuestion));
+    }
+
+    /** @test */
+    public function can_mark_an_answer_as_best()
+    {
+        $question = create(Question::class, ['best_answer_id' => null]);
+
+        $answer = create(Answer::class, ['question_id' => $question->id]);
+
+        $question->markAsBestAnswer($answer);
+
+        $this->assertEquals($question->best_answer_id, $answer->id);
     }
 }

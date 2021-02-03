@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Route;
 | contains the "web" middleware group. Now create something great!
 |
 */
+
 Auth::routes();
 
 Route::get('/questions', 'QuestionsController@index');
@@ -19,3 +20,4 @@ Route::get('/questions/{question}', 'QuestionsController@show');
 
 Route::post('/questions/{question}/answers', 'AnswersController@store');
 
+Route::post('/answers/{answer}/best', 'BestAnswersController@store')->name('best-answers.store');
