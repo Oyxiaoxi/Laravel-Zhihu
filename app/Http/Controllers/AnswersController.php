@@ -26,5 +26,6 @@ class AnswersController extends Controller
         ]);
 
         return response()->json([], 201);
+        return back();
     }
 }

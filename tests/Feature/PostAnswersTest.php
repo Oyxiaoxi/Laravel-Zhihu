@@ -33,7 +33,7 @@ class PostAnswersTest extends TestCase
     public function can_not_post_an_answer_to_an_unpublished_question()
     {
         $question = factory(Question::class)->state('unpublished')->create();
-        $user = factory(User::class)->create();
+        $this->actingAs($user = factory(User::class)->create());
 
         $response = $this->withExceptionHandling()
             ->post("/questions/{$question->id}/answers", [
@@ -53,7 +53,7 @@ class PostAnswersTest extends TestCase
         $this->withExceptionHandling();
 
         $question = factory(Question::class)->state('published')->create();
-        $user = factory(User::class)->create();
+        $this->actingAs($user = factory(User::class)->create());
 
         $response = $this->post("/questions/{$question->id}/answers", [
             'user_id' => $user->id,
@@ -62,5 +62,17 @@ class PostAnswersTest extends TestCase
 
         $response->assertRedirect();
         $response->assertSessionHasErrors('content');
+    }
+
+    /** @test */
+    public function guests_may_not_post_an_answer()
+    {
+        $this->expectException('Illuminate\Auth\AuthenticationException');
+
+        $question = factory(Question::class)->state('published')->create();
+
+        $this->post("/questions/{$question->id}/answers", [
+            'content' => 'This is an answer.'
+        ]);
     }
 }
