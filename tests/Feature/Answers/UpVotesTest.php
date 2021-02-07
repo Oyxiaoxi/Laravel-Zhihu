@@ -3,6 +3,7 @@
 namespace Tests\Feature\Answers;
 
 use App\Models\Answer;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Auth;
 use Tests\TestCase;
@@ -53,6 +54,40 @@ class UpVotesTest extends TestCase
             'voted_id' => $answer->id,
             'voted_type' => get_class($answer),
             'type' => 'vote_up',
+        ]);
+    }
+
+    /** @test */
+    public function an_authenticated_user_can_cancel_vote_up()
+    {
+        $this->signIn();
+
+        $answer = create(Answer::class);
+
+        $this->post("/answers/{$answer->id}/up-votes");
+
+        $this->assertCount(1, $answer->refresh()->votes('vote_up')->get());
+
+        $this->delete("/answers/{$answer->id}/up-votes");
+
+        $this->assertCount(0, $answer->refresh()->votes('vote_up')->get());
+    }
+
+    /** @test */
+    public function can_cancel_vote_up_an_answer()
+    {
+        $this->signIn();
+
+        $answer = create(Answer::class);
+
+        $answer->voteUp(Auth::user());
+
+        $answer->cancelVoteUp(Auth::user());
+
+        $this->assertDatabaseMissing('votes', [
+            'user_id' => auth()->id(),
+            'voted_id' => $answer->id,
+            'voted_type' => get_class($answer)
         ]);
     }
 }
