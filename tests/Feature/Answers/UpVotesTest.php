@@ -1,0 +1,58 @@
+<?php
+
+namespace Tests\Feature\Answers;
+
+use App\Models\Answer;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Auth;
+use Tests\TestCase;
+
+class UpVotesTest extends TestCase
+{
+    use RefreshDatabase;
+
+    /** @test */
+    public function guest_can_not_vote_up()
+    {
+        $this->withExceptionHandling()
+            ->post('/answers/1/up-votes')
+            ->assertRedirect('/login');
+    }
+
+    /** @test */
+    public function authenticated_user_can_vote_up()
+    {
+        $this->signIn();
+
+        $answer = create(Answer::class);
+
+        $this->post("/answers/{$answer->id}/up-votes")
+            ->assertStatus(201);
+
+        $this->assertCount(1, $answer->refresh()->votes('vote_up')->get());
+    }
+
+    /** @test */
+    public function can_vote_up_an_answer()
+    {
+        $this->signIn();
+
+        $answer = create(Answer::class);
+
+        $this->assertDatabaseMissing('votes', [
+            'user_id' => auth()->id(),
+            'voted_id' => $answer->id,
+            'voted_type' => get_class($answer),
+            'type' => 'vote_up',
+        ]);
+
+        $answer->voteUp(Auth::user());
+
+        $this->assertDatabaseHas('votes', [
+            'user_id' => auth()->id(),
+            'voted_id' => $answer->id,
+            'voted_type' => get_class($answer),
+            'type' => 'vote_up',
+        ]);
+    }
+}
