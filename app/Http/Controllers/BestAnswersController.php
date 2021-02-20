@@ -18,6 +18,6 @@ class BestAnswersController extends Controller
 
         $answer->question->markAsBestAnswer($answer);
 
-        return back();
+        return back()->with('flash', '已设为最佳答案！');
     }
 }
